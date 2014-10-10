@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Blackjack!</title>
+    <link rel="stylesheet" href="vendor/bootstrap/css/normalize.css">
+    <link rel="stylesheet" href="/vendor/bootstrap/css/bootstrap.css">
+    <link rel="stylesheet" href="/application.css">
+  </head>
+  <body>
+
+<!--     <div class="navbar navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container">
+            <a class="brand" href="#">Blackjack!</a>
+            <ul class="nav">
+              <li><a href="/">Restart Game</a></li>
+              <li><a href="/profile">Profile</a></li>
+            </ul>
+        </div>
+      </div>
+    </div>
+
+  <div class="container">
+    <%if @error %>
+      <div class="alert alert-error"><%=@error%></div>
+    <% end %>
+      <%= yield %>    
+  </div> -->
+    <div class="container">
+      <div class="row">
+        <div class="col-md-9">
+          <h2>Blackjack!<!-- <img src="http://placehold.it/400x100&text=Logo"/> --></h2>
+        </div>
+        <div class="col-md-3">
+          <h3>Balance: $<%= session[:player_bank] %></h3>
+        </div>
+      </div>
+      
+      <div class="row">
+        <div class="col-md-3">
+          <div class="btn-group-vertical btn-block btn-group-lg">
+            <a href="/" class="btn btn-inverse" role="button">Restart Game</a>
+            <a href="/profile" class="btn btn-inverse" role="button">Profile</a>
+          </div>
+        </div>
+
+        <div class="col-md-9">
+
+            <%= yield %>
+                
+        </div>
+        
+      </div>
+
+      <footer class="row">
+        <div class="large-12 columns">
+          <hr/>
+        </div> 
+      </footer>
+    </div>
+  </body>
+</html>

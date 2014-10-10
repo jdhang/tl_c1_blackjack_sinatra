@@ -1,0 +1,17 @@
+<div class="row">
+  <div class="col-md-12">
+    <h4>Welcome <%= session[:player_name] %>!</h4>
+    <h5>Balance: $<%= session[:player_bank] %></h5>
+  </div>
+</div>
+<div class="row">
+  <div class="col-md-4">
+    <form role="form" action="/bet" method='post'>
+      <div class="form-group">
+        <label for="bet">Please place a bet for this round:</label>
+        <input class="form-control" type="text" name="bet"/>
+      </div>
+      <button type="submit" class="btn btn-primary btn-block">Place Bet</button>
+    </form>
+  </div>  
+</div>

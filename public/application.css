@@ -1,0 +1,9 @@
+.btn-inverse {
+  background-color: #111;
+  color: white;
+}
+
+.btn-inverse:hover{
+  color: white;
+  background-color: #222;
+}

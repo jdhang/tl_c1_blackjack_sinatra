@@ -1,0 +1,41 @@
+<div class="row">
+  <div class="row">
+    <div class="col-md-4">
+      <h3>Dealer's cards are:</h3>
+      <ul>
+        <% session[:dealer_cards].each do |card| %>
+          <li><%= "#{card[1]} of #{card[0]}" %></li>
+        <% end %>
+      </ul>
+      <h4>Card Total: <%= calculate_total(session[:dealer_cards]) %></h4>
+    </div>
+
+    <div class="col-md-4">
+      <h3><%= session[:player_name]+'\'s' %> cards are:</h3>
+      <ul>
+        <% session[:player_cards].each do |card| %>
+          <li><%= "#{card[1]} of #{card[0]}" %> </li>
+        <%end%>
+      </ul>
+      <h4>Card Total: <%= calculate_total(session[:player_cards]) %></h4>
+    </div>
+
+    <div class="col-md-4">
+      <% if session[:blackjack] %>
+        <h4><%= session[:player_name] + " Blackjack!" %></h4>
+      <% elsif session[:bust] %>
+        <h4><%= session[:player_name] + " Bust!" %></h4>
+      <% end %>
+    </div>
+  </div>
+  
+  <div class="row">
+    <div class="col-md-7">
+      <div class="btn-group btn-group-lg btn-group-justified">
+        <a href='/hit' class='btn btn-success' type="button">Hit</a>
+        <a href='/dealer_turn' class='btn btn-danger' type="button">Stand</a>
+        <a href="/play_again" class='btn btn-primary' type="button">Play again?</a>
+      </div>
+    </div>
+  </div>
+</div>
