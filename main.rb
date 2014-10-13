@@ -8,12 +8,20 @@ use Rack::Session::Cookie, :key => 'rack.session',
                            :path => '/',
                            :secret => 'your_secret'
 
-SUITS = ['Hearts', 'Diamonds', 'Spades', 'Clubs']
-VALUES = ['Ace',2,3,4,5,6,7,8,9,10,'Jack','Queen','King']
+SUITS = ['hearts', 'diamonds', 'spades', 'clubs']
+VALUES = ['ace',2,3,4,5,6,7,8,9,10,'jack','queen','king']
 MAX_BET = 500
 MIN_BET = 10
 
 helpers do
+  def image_of(card)
+    '<img src="/images/cards/'+card[0]+'_'+card[1].to_s+".jpg\" alt=\""+card[1].to_s+' of '+card[0]+'">'
+  end
+
+  def card_cover
+    '<img src="/images/cards/cover.jpg" alt="card cover">'
+  end
+
   def create_deck
     session[:deck] = []
     SUITS.each do |suit|
@@ -43,37 +51,29 @@ helpers do
   end
 
   def blackjack?(cards)
-    calculate_total(cards) == 21 ? session[:blackjack] = true : session[:blackjack] = false
+    calculate_total(cards) == 21 ? session[:blackjack][0] = true : session[:blackjack][0] = false
   end
 
   def bust?(cards)
-    calculate_total(cards) > 21 ? session[:bust] = true : session[:bust] = false
-  end
-
-  def dealer_turn
-    blackjack?(session[:dealer_cards])
-    bust?(session[:dealer_cards])
-    unless dealer_reach_17? || session[:blackjack] || session[:bust]
-      begin
-        dealer_deal        
-      end until dealer_reach_17? || session[:blackjack] || session[:bust]
-    end
+    calculate_total(cards) > 21 ? session[:bust][0] = true : session[:bust][0] = false
   end
 
   def player_turn
     blackjack?(session[:player_cards])
     bust?(session[:player_cards])
-    unless session[:blackjack] || session[:bust]
+    session[:blackjack][1] = session[:player_name] if session[:blackjack][0]
+    session[:bust][1] = session[:player_name] if session[:bust][0]
+    unless session[:blackjack][0] || session[:bust][0]
       player_deal
     end
   end
 
   def calculate_total(cards)
-    face_cards = ['Jack', 'Queen', 'King']
+    face_cards = ['jack', 'queen', 'king']
     total = 0
     ace_count = 0
     cards.each do |card|
-      if card[1] == 'Ace'
+      if card[1] == 'ace'
         total += 11
         ace_count += 1
       elsif face_cards.include?(card[1])
@@ -89,12 +89,24 @@ end
 
 get '/' do
   session[:player_bank] = 0
-  session[:player_name] = "Player"
   session[:total_winnings] = 0
   session[:games_won] = 0
   session[:games_lost] = 0
   session[:games_tied] = 0
+  session[:blackjack] = []
+  session[:bust] = []
+  session[:stand] = false
   create_deck
+  if session[:player_name]
+    redirect '/profile'
+  else
+    redirect '/set_name'
+  end
+end
+
+get '/set_name' do
+  session[:player_name] = nil
+  session[:player_bank] = 0
   erb :set_name
 end
 
@@ -110,7 +122,7 @@ end
 post '/add_bank' do
   redirect '/add_bank' if params[:buyin].to_i < MIN_BET
   session[:player_bank] += params[:buyin].to_i
-  redirect '/confirm_bank'
+  redirect '/profile'
 end
 
 get '/add_bank' do
@@ -121,16 +133,23 @@ get '/confirm_bank' do
   erb :confirm_bank
 end
 
-get '/hit' do
+post '/hit' do
   player_turn
-   blackjack?(session[:player_cards])
+  blackjack?(session[:player_cards])
   bust?(session[:player_cards])
+  redirect '/game_over' if session[:blackjack][0] || session[:bust][0]
   redirect '/game'
 end
 
-get '/dealer_turn' do
-  dealer_turn
+post '/stand' do
+  session[:bank] += (session[:bet]*3) if session[:blackjack][0]
+  session[:stand] = true
+  redirect '/game_over' if session[:blackjack][0] || session[:bust][0]
   redirect '/game'
+end
+
+post '/play' do
+  redirect '/bet'
 end
 
 post '/bet' do
@@ -143,7 +162,7 @@ get '/bet' do
   erb :bet
 end
 
-get '/play_again' do
+post '/play_again' do
   redirect '/bet'
 end
 
@@ -156,10 +175,15 @@ get '/init' do
   dealer_deal
   blackjack?(session[:player_cards])
   bust?(session[:player_cards])
+  redirect '/game_over' if session[:blackjack][0] || session[:bust][0]
   redirect '/game'
 end
 
 get '/game' do
   erb :game
+end
+
+get '/game_over' do
+  erb :game_over
 end
 

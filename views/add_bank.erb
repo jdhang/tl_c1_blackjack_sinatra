@@ -3,14 +3,22 @@
     <h4>Welcome <%= session[:player_name] %>!</h4>
    </div>
 </div>
- <div class="row">
-   <div class="col-md-4">
-      <form role="form" action="/add_bank" method='post'>
-        <div class="form-group">
-          <label for="buyin">How much would you like to buy-in?</label>
-          <input class="form-control" type="text" name="buyin"/>
+<div class="row">
+ <div class="col-md-4">
+    <form role="form" action="/add_bank" method='post'>
+      <div class="form-group">
+        <label for="buyin">How much would you like to buy-in?</label>
+        <div class="row">
+          <div class="col-md-8">
+            <input class="form-control" type="text" name="buyin"/>
+          </div>
         </div>
-        <button type="submit" class="btn btn-primary btn-block">Add to Bank</button>
-      </form>   
-   </div>
+      </div>
+      <div class="row">
+        <div class="col-md-8">
+          <button type="submit" class="btn btn-primary btn-block">Add to Bank</button>
+        </div>
+      </div>
+    </form>   
  </div>
+</div>

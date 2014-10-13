@@ -1,0 +1,39 @@
+<div class="row">
+  <div class="row">
+    <div class="col-md-12">
+      <div class="well">
+        <h4>Dealer's Hand:</h4>
+        <% cards= session[:dealer_cards] %>
+        <% cards.each do |card| %>
+          <% if session[:dealer_cards].length == 2 && cards.index(card) == 0 %>
+            <%= '<img src="/images/cards/cover.jpg" alt="card cover">'%>
+          <% else %>
+            <%= image_of card %>
+          <% end %>
+        <% end %>
+      </div>
+      <div class="well">
+        <h4><%= session[:player_name]+'\'s' %> Hand:</h4>
+          <% session[:player_cards].each do |card| %>
+            <%= image_of card%>
+          <% end %>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <% if session[:blackjack][0] %>
+        <h4><%= session[:player_name] + " Blackjack!" %></h4>
+      <% elsif session[:bust][0] %>
+        <h4><%= session[:player_name] + " Bust!" %></h4>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-7">
+      <form id="play_again" action="/play_again" method="POST">
+        <input type="submit" value="Play again?" class='btn btn-primary btn-lg'>
+      </form>
+    </div>
+  </div>
+</div>

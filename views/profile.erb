@@ -1,23 +1,22 @@
 <div class="row">
-  <div class="col-md-8">
-    <div class="row">
-      <h4><%= session[:player_name]+"'s Profile" %></h4>
-    </div>
-
-    <div class="row">
-      <p>Balance: $<%= session[:player_bank] %></p>
-      <a href="/add_bank" class='btn btn-primary btn-sm'>Add to Bank</a>
-    </div>
-
-    <div class="row">
-      <p>Total Winnings: $<%= session[:total_winnings] %></p>
-      <p>Games won: <%= session[:games_won] %></p>
-      <p>Games lost: <%= session[:games_lost] %></p>
-      <p>Games tied: <%= session[:games_tied] %></p>
-    </div>
-
-    <div class="row">
-      <a href="/init" class="btn btn-lg btn-success">Play Blackjack!</a> 
+  <div class="row">
+    <div class="col-md-12">
+      <div class="well">
+        <h3>Profile</h3>
+        <h4>Balance: $<%= session[:player_bank] %></h4>
+        <p>Total Winnings: $<%= session[:total_winnings] %></p>
+        <p>Games won: <%= session[:games_won] %></p>
+        <p>Games lost: <%= session[:games_lost] %></p>
+        <p>Games tied: <%= session[:games_tied] %></p>
+      </div>
+      <div class="btn-group btn-group-lg">
+        <form action="/play" method="post">
+          <input type="submit" class="btn btn-success" value="Play Blackjack!">
+        </form>
+        <form action="/add_bank" method="post">
+          <input type="submit" class='btn btn-primary' value="Add to Bank">
+        </form>
+      </div>
     </div>
   </div>
 </div>

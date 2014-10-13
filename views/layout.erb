@@ -2,7 +2,6 @@
 <html>
   <head>
     <title>Blackjack!</title>
-    <link rel="stylesheet" href="vendor/bootstrap/css/normalize.css">
     <link rel="stylesheet" href="/vendor/bootstrap/css/bootstrap.css">
     <link rel="stylesheet" href="/application.css">
   </head>
@@ -29,22 +28,37 @@
     <div class="container">
       <div class="row">
         <div class="col-md-9">
-          <h2>Blackjack!<!-- <img src="http://placehold.it/400x100&text=Logo"/> --></h2>
-        </div>
-        <div class="col-md-3">
-          <h3>Balance: $<%= session[:player_bank] %></h3>
+          <h1>BLACKJACK</h1>
         </div>
       </div>
-      
+
+      <% if session[:player_name] != nil %>
+        <div class="row">
+          <div class="col-md-7 col-md-offset-2">
+            <h3><strong>Player: </strong><%= session[:player_name] %></h3>
+          </div>
+          <div class="col-md-3">
+            <h3 style="text-align: right; margin-right: 10px"><strong>Balance:</strong> $<%= session[:player_bank] %></h3>
+          </div>
+        </div>
+      <% end %>
+  
       <div class="row">
-        <div class="col-md-3">
+        <div class="col-md-2">
           <div class="btn-group-vertical btn-block btn-group-lg">
             <a href="/" class="btn btn-inverse" role="button">Restart Game</a>
-            <a href="/profile" class="btn btn-inverse" role="button">Profile</a>
+            <a href="/profile" 
+              <% if session[:player_name] == nil %>
+                <%= "class='btn btn-inverse disabled'" %>
+              <% else %>
+                <%= "class='btn btn-inverse'" %>
+              <% end %>
+             role="button">Profile</a>
+             <a href="/set_name" class="btn btn-inverse" role="button">Change Player</a>
           </div>
         </div>
 
-        <div class="col-md-9">
+        <div class="col-md-10">
 
             <%= yield %>
                 

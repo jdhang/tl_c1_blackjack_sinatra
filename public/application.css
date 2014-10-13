@@ -1,9 +1,55 @@
+body{
+  margin-top: 50px;
+  background-color: #999;
+}
+
+h3{
+  margin-top: 0;
+}
+
+img{
+  margin-right: 10px;
+  margin-bottom: 10px;
+  border: 2px solid black;
+  border-radius: 5px;
+}
+
+input[type="submit"]{
+  margin-top: 10px;
+}
+
+.well{
+  margin-right: 20px;
+}
+
+.container{
+  background-color: white;
+}
+
 .btn-inverse {
-  background-color: #111;
+  background-color: #232323;
   color: white;
 }
 
 .btn-inverse:hover{
   color: white;
-  background-color: #222;
+  background-color: #121212;
+}
+
+form#stand, form#hit{
+  float: left;
+}
+
+input[value="Hit"]{
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+input[value="Stand"]{
+  border-radius: 0;
+}
+
+#play_again_input{
+  border-bottom-left-radius: 0;
+  border-top-left-radius: 0;
 }

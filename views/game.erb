@@ -1,41 +1,60 @@
 <div class="row">
   <div class="row">
-    <div class="col-md-4">
-      <h3>Dealer's cards are:</h3>
-      <ul>
-        <% session[:dealer_cards].each do |card| %>
-          <li><%= "#{card[1]} of #{card[0]}" %></li>
+    <div class="col-md-12">
+      <div class="well">
+        <h4>Dealer's Hand:</h4>
+        <% cards= session[:dealer_cards] %>
+        <% cards.each do |card| %>
+          <% if session[:dealer_cards].length == 2 && cards.index(card) == 0 && !session[:stand]%>
+            <%= card_cover %>
+          <% else %>
+            <%= image_of card %>
+          <% end %>
         <% end %>
-      </ul>
-      <h4>Card Total: <%= calculate_total(session[:dealer_cards]) %></h4>
-    </div>
+        <% if session[:stand] %>
+          <h4><%= "Dealer has "+calculate_total(session[:dealer_cards]).to_s %></h4>
 
-    <div class="col-md-4">
-      <h3><%= session[:player_name]+'\'s' %> cards are:</h3>
-      <ul>
-        <% session[:player_cards].each do |card| %>
-          <li><%= "#{card[1]} of #{card[0]}" %> </li>
-        <%end%>
-      </ul>
-      <h4>Card Total: <%= calculate_total(session[:player_cards]) %></h4>
-    </div>
-
-    <div class="col-md-4">
-      <% if session[:blackjack] %>
-        <h4><%= session[:player_name] + " Blackjack!" %></h4>
-      <% elsif session[:bust] %>
-        <h4><%= session[:player_name] + " Bust!" %></h4>
-      <% end %>
+        <% end %>
+      </div>
+      <div class="well">
+        <div class="row">
+          <div class="col-md-9">
+            <h4><%= session[:player_name]+'\'s' %> Hand:</h4>
+          </div>
+          <div class="col-md-3">
+            <h4 style="text-align: right; margin-right: 10px"><%= "Bet: $"+session[:bet].to_s %></h4>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-12">
+              <% session[:player_cards].each do |card| %>
+              <%= image_of card%>
+            <% end %>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
-  
+  <div class="row">
+    <div class="col-md-12">
+      <h4>
+        <%= session[:player_name]+" has "+calculate_total(session[:player_cards]).to_s+"." %>
+        <%= "What would you like to do?" %>
+      </h4>
+    </div>
+  </div>
+
   <div class="row">
     <div class="col-md-7">
-      <div class="btn-group btn-group-lg btn-group-justified">
-        <a href='/hit' class='btn btn-success' type="button">Hit</a>
-        <a href='/dealer_turn' class='btn btn-danger' type="button">Stand</a>
-        <a href="/play_again" class='btn btn-primary' type="button">Play again?</a>
-      </div>
+      <form id="hit" action="/hit" method="POST">
+        <input type="submit" value="Hit" class='btn btn-success btn-lg'>
+      </form>
+      <form id="stand" action="/stand" method="POST">
+        <input type="submit" value="Stand" class='btn btn-danger btn-lg'>
+      </form>
+      <form id="play_again" action="/play_again" method="POST">
+        <input id="play_again_input" type="submit" value="Play again?" class='btn btn-primary btn-lg'>
+      </form>
     </div>
   </div>
 </div>
