@@ -3,28 +3,11 @@
   <head>
     <title>Blackjack!</title>
     <link rel="stylesheet" href="/vendor/bootstrap/css/bootstrap.css">
+    <link rel="stylesheet" href="/vendor/bootstrap/css/normalize.css">
     <link rel="stylesheet" href="/application.css">
   </head>
   <body>
 
-<!--     <div class="navbar navbar-fixed-top">
-      <div class="navbar-inner">
-        <div class="container">
-            <a class="brand" href="#">Blackjack!</a>
-            <ul class="nav">
-              <li><a href="/">Restart Game</a></li>
-              <li><a href="/profile">Profile</a></li>
-            </ul>
-        </div>
-      </div>
-    </div>
-
-  <div class="container">
-    <%if @error %>
-      <div class="alert alert-error"><%=@error%></div>
-    <% end %>
-      <%= yield %>    
-  </div> -->
     <div class="container">
       <div class="row">
         <div class="col-md-9">
@@ -32,29 +15,48 @@
         </div>
       </div>
 
-      <% if session[:player_name] != nil %>
+      <%if @error %>
+        <div class="row">
+          <div class="col-md-12">
+            <div class="alert alert-danger" role="alert" style="text-align: center"><strong><%=@error%></strong></div>
+          </div>
+        </div>
+      <% elsif @success %>
+        <div class="row">
+          <div class="col-md-12">
+            <div class="alert alert-success" role="alert" style="text-align: center"><strong><%=@success%></strong></div>
+          </div>
+        </div>
+      <% end %> 
+
+      <% if @hide_player_info || session[:player_name] == nil %>
+        <div class="row">
+          <div class="col-md-7">
+            <h3 style="visibility: hidden">Player</h3>
+          </div>
+        </div>      
+      <% else session[:player_name] != nil %>
         <div class="row">
           <div class="col-md-7 col-md-offset-2">
             <h3><strong>Player: </strong><%= session[:player_name] %></h3>
           </div>
           <div class="col-md-3">
-            <h3 style="text-align: right; margin-right: 10px"><strong>Balance:</strong> $<%= session[:player_bank] %></h3>
+            <h3 style="text-align: right; margin-right: 10px"><strong>Balance:</strong> $<%= session[:player_balance] %></h3>
           </div>
         </div>
-      <% end %>
+      <% end %>  
   
-      <div class="row">
+      <div class="row" style="margin-top: 10px">
         <div class="col-md-2">
           <div class="btn-group-vertical btn-block btn-group-lg">
             <a href="/" class="btn btn-inverse" role="button">Restart Game</a>
-            <a href="/profile" 
-              <% if session[:player_name] == nil %>
+            <a href="/game/player/profile" 
+              <% if session[:player_name] == nil || @game_over%>
                 <%= "class='btn btn-inverse disabled'" %>
               <% else %>
                 <%= "class='btn btn-inverse'" %>
               <% end %>
              role="button">Profile</a>
-             <a href="/set_name" class="btn btn-inverse" role="button">Change Player</a>
           </div>
         </div>
 

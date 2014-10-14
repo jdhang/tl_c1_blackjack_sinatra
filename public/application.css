@@ -18,6 +18,21 @@ input[type="submit"]{
   margin-top: 10px;
 }
 
+.btn-form-group>form>input{
+  float: left;
+  border-radius: 0;
+}
+
+.btn-form-group>form:first-child>input{
+  border-top-left-radius: 6px;
+  border-bottom-left-radius: 6px;
+}
+
+.btn-form-group>form:last-child>input{
+  border-top-right-radius: 6px;
+  border-bottom-right-radius: 6px;
+}
+
 .well{
   margin-right: 20px;
 }
@@ -34,22 +49,4 @@ input[type="submit"]{
 .btn-inverse:hover{
   color: white;
   background-color: #121212;
-}
-
-form#stand, form#hit{
-  float: left;
-}
-
-input[value="Hit"]{
-  border-top-right-radius: 0;
-  border-bottom-right-radius: 0;
-}
-
-input[value="Stand"]{
-  border-radius: 0;
-}
-
-#play_again_input{
-  border-bottom-left-radius: 0;
-  border-top-left-radius: 0;
 }

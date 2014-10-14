@@ -14,12 +14,14 @@ MAX_BET = 500
 MIN_BET = 10
 
 helpers do
-  def image_of(card)
-    '<img src="/images/cards/'+card[0]+'_'+card[1].to_s+".jpg\" alt=\""+card[1].to_s+' of '+card[0]+'">'
-  end
-
-  def card_cover
-    '<img src="/images/cards/cover.jpg" alt="card cover">'
+  def initialize_game
+    session[:player_cards] = []
+    session[:dealer_cards] = []
+    create_deck
+    2.times do
+      player_deal
+      dealer_deal
+    end
   end
 
   def create_deck
@@ -41,31 +43,12 @@ helpers do
     session[:dealer_cards] << session[:deck].pop
   end
 
-  def dealer_reach_17?
-    total = calculate_total(session[:dealer_cards])
-    if total >= 17
-      true
-    else
-      false
-    end
+  def image_of(card)
+    '<img src="/images/cards/'+card[0]+'_'+card[1].to_s+".jpg\" alt=\""+card[1].to_s+' of '+card[0]+'">'
   end
 
-  def blackjack?(cards)
-    calculate_total(cards) == 21 ? session[:blackjack][0] = true : session[:blackjack][0] = false
-  end
-
-  def bust?(cards)
-    calculate_total(cards) > 21 ? session[:bust][0] = true : session[:bust][0] = false
-  end
-
-  def player_turn
-    blackjack?(session[:player_cards])
-    bust?(session[:player_cards])
-    session[:blackjack][1] = session[:player_name] if session[:blackjack][0]
-    session[:bust][1] = session[:player_name] if session[:bust][0]
-    unless session[:blackjack][0] || session[:bust][0]
-      player_deal
-    end
+  def card_cover
+    '<img src="/images/cards/cover.jpg" alt="card cover">'
   end
 
   def calculate_total(cards)
@@ -85,105 +68,215 @@ helpers do
     total -= (ace_count * 10) if total > 21
     total
   end
+
+  def dealer_hit
+    total = calculate_total(session[:dealer_cards])
+    unless total >= 17 || total > 21 || total == 21
+      begin
+        dealer_deal
+        total = calculate_total(session[:dealer_cards])
+      end until total >= 17 || total > 21 || total == 21
+    end
+  end
+
+  def check_blackjack_or_bust
+    total = calculate_total(session[:player_cards])
+    if total > 21
+      @error = "Bust! You lose $"+session[:bet].to_s
+      @show_option_pane = false
+      session[:games_lost] += 1
+    elsif total == 21
+      @success = "Blackjack! You win $"+session[:bet].to_s
+      @show_option_pane = false
+      session[:total_winnings] += session[:bet]
+      session[:player_balance] += (session[:bet])*2
+      session[:games_won] += 1
+    end
+  end
+
+  def check_dealer_and_winner
+    total = calculate_total(session[:dealer_cards])
+    p_total = calculate_total(session[:player_cards])
+    if total > 21
+      @success = "Dealer Bust! You win $"+session[:bet].to_s
+      @show_option_pane = false
+      session[:total_winnings] += session[:bet]
+      session[:player_balance] += (session[:bet])*2
+      session[:games_won] += 1
+    elsif total == 21
+      @error = "Dealer Blackjack! You lose $"+session[:bet].to_s
+      @show_option_pane = false
+      session[:games_lost] += 1
+    elsif p_total == total
+      @success = "It's a tie! You get your bet back!"
+      @show_option_pane = false
+      session[:games_tied] += 1
+    elsif p_total > total
+      @success = "You have the higher hand! You win $"+session[:bet].to_s
+      @show_option_pane = false
+      session[:total_winnings] += session[:bet]
+      session[:player_balance] += (session[:bet])*2
+      session[:games_won] += 1
+    elsif total > p_total
+      @error = "Dealer has the higher hand! You lose $"+session[:bet].to_s
+      @show_option_pane = false
+      session[:games_lost] += 1
+    end
+  end
+end
+
+before do
+  @show_option_pane = true
+  @hide_player_info = false
 end
 
 get '/' do
-  session[:player_bank] = 0
+  session[:player_name] = nil
+  session[:bet] = 0
+  session[:player_balance] = 0
   session[:total_winnings] = 0
   session[:games_won] = 0
   session[:games_lost] = 0
   session[:games_tied] = 0
-  session[:blackjack] = []
-  session[:bust] = []
-  session[:stand] = false
-  create_deck
-  if session[:player_name]
-    redirect '/profile'
-  else
-    redirect '/set_name'
-  end
-end
-
-get '/set_name' do
-  session[:player_name] = nil
-  session[:player_bank] = 0
+  session[:rounds] = 0
   erb :set_name
 end
 
-post '/set_name' do
-  session[:player_name] = params[:player_name]
-  redirect '/add_bank'
+get '/game/player/set_name' do
+  erb :set_name
 end
 
-get '/profile' do
+post '/game/player/set_name' do
+  if params[:player_name] == ""
+    @error = "You must enter a player name!"
+    erb :set_name
+  else
+    session[:player_name] = params[:player_name]
+    redirect '/game/player/buyin'
+  end
+end
+
+get '/game/player/buyin' do
+  erb :add_balance
+end
+
+post '/game/player/buyin' do
+  if params[:buyin] == ""
+    @error = "You need to enter a value in order to buy in!"
+    erb :add_balance
+  elsif params[:buyin].to_i == 0 && params[:bet] == 0
+    @error = "You entered an invalid value!"
+    erb :add_balance
+  else
+    session[:player_balance] += params[:buyin].to_i
+    redirect '/game/player/profile'
+  end
+end
+
+get '/game/player/add_balance' do
+  erb :add_balance
+end
+
+post '/game/player/add_balance' do
+  erb :add_balance
+end
+
+get '/game/player/profile' do
   erb :profile
 end
 
-post '/add_bank' do
-  redirect '/add_bank' if params[:buyin].to_i < MIN_BET
-  session[:player_bank] += params[:buyin].to_i
-  redirect '/profile'
+post '/game/play' do
+  if session[:player_balance] == 0
+    @error = "You need some money to play!"
+    erb :profile
+  else
+    redirect '/game/player/bet'
+  end
 end
 
-get '/add_bank' do
-  erb :add_bank
+post '/game/player/bet' do
+  if params[:bet] == ""
+    @error = "You need to enter a bet in order to play!"
+    erb :bet
+  elsif params[:bet].to_i == 0 && params[:bet] == 0
+    @error = "You entered an invalid value!"
+    erb :bet
+  elsif (session[:player_balance]-params[:bet].to_i)<0
+    @error = 'You don\'t have enough to bet that amount! You should <a href="/game/player/add_balance" class="alert-link">add to your balance</a>.'
+    erb :bet
+  elsif params[:bet].to_i > MAX_BET
+    @error = "That bet is above the maximum bet limit!"
+    erb :bet
+  elsif params[:bet].to_i < MIN_BET
+    @error = "That bet is below the minimum bet limit!"
+    erb :bet
+  else
+    session[:bet] = params[:bet].to_i
+    session[:player_balance] -= session[:bet]
+    redirect '/game/initialize'
+  end
 end
 
-get '/confirm_bank' do
-  erb :confirm_bank
-end
-
-post '/hit' do
-  player_turn
-  blackjack?(session[:player_cards])
-  bust?(session[:player_cards])
-  redirect '/game_over' if session[:blackjack][0] || session[:bust][0]
-  redirect '/game'
-end
-
-post '/stand' do
-  session[:bank] += (session[:bet]*3) if session[:blackjack][0]
-  session[:stand] = true
-  redirect '/game_over' if session[:blackjack][0] || session[:bust][0]
-  redirect '/game'
-end
-
-post '/play' do
-  redirect '/bet'
-end
-
-post '/bet' do
-  session[:bet] = params[:bet]
-  session[:player_bank] -= params[:bet].to_i
-  redirect '/init'
-end
-
-get '/bet' do
+get '/game/player/bet' do
   erb :bet
 end
 
-post '/play_again' do
-  redirect '/bet'
-end
-
-get '/init' do
-  session[:player_cards] = []
-  session[:dealer_cards] = []
-  player_deal
-  dealer_deal
-  player_deal
-  dealer_deal
-  blackjack?(session[:player_cards])
-  bust?(session[:player_cards])
-  redirect '/game_over' if session[:blackjack][0] || session[:bust][0]
+get '/game/initialize' do
+  initialize_game
+  session[:rounds] += 1
   redirect '/game'
 end
 
 get '/game' do
+  check_blackjack_or_bust
   erb :game
 end
 
-get '/game_over' do
-  erb :game_over
+post '/game/player/hit' do
+  player_deal
+  check_blackjack_or_bust
+  erb :game
 end
 
+post '/game/player/stand' do
+  @flip_card = true
+  erb :game
+end
+
+post '/game/dealer/flip' do
+  @flip = true
+  @flip_card = false
+  @dealer_turn = true
+  unless calculate_total(session[:dealer_cards]) < 17
+    check_dealer_and_winner
+    @dealer_turn = false
+  end
+  erb :game
+end
+
+post '/game/dealer/hit' do
+  dealer_hit
+  check_dealer_and_winner
+  @flip = true
+  erb :game
+end
+
+post '/game/play_again/yes' do
+  if session[:player_balance] == 0
+    @error = 'You need to <a href="/game/player/add_balance" class="alert-link">add to your balance</a> in order to play again!'
+    @show_option_pane = false
+    erb :game
+  else
+    redirect '/game/player/bet'
+  end
+end
+
+post '/game/play_again/no' do
+  redirect '/game_over'
+end
+
+get '/game_over' do
+  @hide_player_info = true
+  @game_over = true
+  erb :game_summary
+end

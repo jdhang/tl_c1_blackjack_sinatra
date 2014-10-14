@@ -2,19 +2,20 @@
   <div class="row">
     <div class="col-md-12">
       <div class="well">
-        <h3>Profile</h3>
-        <h4>Balance: $<%= session[:player_bank] %></h4>
+        <h3><strong>Profile</strong></h3>
+        <h4>Balance: $<%= session[:player_balance] %></h4>
         <p>Total Winnings: $<%= session[:total_winnings] %></p>
-        <p>Games won: <%= session[:games_won] %></p>
-        <p>Games lost: <%= session[:games_lost] %></p>
-        <p>Games tied: <%= session[:games_tied] %></p>
+        <p>Rounds played: <%= session[:rounds] %></p>
+        <p>Rounds won: <%= session[:games_won] %></p>
+        <p>Rounds lost: <%= session[:games_lost] %></p>
+        <p>Rounds tied: <%= session[:games_tied] %></p>
       </div>
-      <div class="btn-group btn-group-lg">
-        <form action="/play" method="post">
-          <input type="submit" class="btn btn-success" value="Play Blackjack!">
+      <div class="btn-form-group">
+        <form action="/game/play" method="post">
+          <input type="submit" class="btn btn-success btn-lg" value="Play Blackjack!">
         </form>
-        <form action="/add_bank" method="post">
-          <input type="submit" class='btn btn-primary' value="Add to Bank">
+        <form action="/game/player/add_balance" method="post">
+          <input type="submit" class='btn btn-primary btn-lg' value="Add to Balance">
         </form>
       </div>
     </div>
