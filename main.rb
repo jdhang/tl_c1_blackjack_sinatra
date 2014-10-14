@@ -164,6 +164,9 @@ post '/game/player/buyin' do
   if params[:buyin] == ""
     @error = "You need to enter a value in order to buy in!"
     erb :add_balance
+  elsif params[:buyin].to_i < 0
+    @error = "You can't enter a negative value!"
+    erb :add_balance
   elsif params[:buyin].to_i == 0 && params[:bet] == 0
     @error = "You entered an invalid value!"
     erb :add_balance
@@ -197,6 +200,9 @@ end
 post '/game/player/bet' do
   if params[:bet] == ""
     @error = "You need to enter a bet in order to play!"
+    erb :bet
+  elsif params[:bet].to_i < 0
+    @error = "You can't have a negative bet!"
     erb :bet
   elsif params[:bet].to_i == 0 && params[:bet] == 0
     @error = "You entered an invalid value!"
