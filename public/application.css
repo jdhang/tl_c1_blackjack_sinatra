@@ -18,6 +18,24 @@ input[type="submit"]{
   margin-top: 10px;
 }
 
+.stats {
+  font-size: 1.15em;
+}
+
+.h2-mod {
+  margin: 0;
+  margin-bottom: 10px;
+}
+#balance_button>input {
+  margin: 0;
+  float: right;
+  margin-left: 5px;
+  font-size: 1.25em;
+  padding: 0;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
 .btn-form-group>form>input{
   float: left;
   border-radius: 0;
@@ -49,4 +67,9 @@ input[type="submit"]{
 .btn-inverse:hover{
   color: white;
   background-color: #121212;
+}
+
+.alert-result {
+  padding: 0;
+  padding-right: 20px;
 }

@@ -1,15 +1,20 @@
 <div class="row">
   <div class="col-md-12">
-    <h3><strong>Thanks for playing <%= " "+session[:player_name]+"!"%></strong></h3>
-    <h4>You won a total of <%= " $"+session[:total_winnings].to_s+" after playing "+session[:rounds].to_s+" rounds!" %></h4>
+    <h2 class="h2-mod"><strong>Thanks for playing <%= " "+session[:player_name]+"!"%></strong></h2>
     <div class="row">
       <div class="col-md-12">
-        <h4><strong>Game Stats:</strong></h4>
-        <p>
-          Rounds Won: <%= session[:games_won] %> <br/>
-          Rounds Lost: <%= session[:games_lost] %> <br/>
-          Rounds Tied: <%= session[:games_tied] %> <br/>
-        </p>
+        <div class="well">
+          <h3><strong>Game Stats:</strong></h3>
+          <p class="stats">
+            <strong>Total Buyin:</strong> $<%= session[:total_buyins] %><br/>
+            <strong>Total Won:</strong> $<%= session[:total_winnings] %><br/>
+            <strong>Total Lost:</strong> $<%= session[:total_lost] %><br/>
+            <strong>Rounds Player:</strong> <%= session[:rounds] %><br/>
+            <strong>Rounds Won:</strong> <%= session[:games_won] %> <br/>
+            <strong>Rounds Lost: </strong><%= session[:games_lost] %> <br/>
+            <strong>Rounds Tied:</strong> <%= session[:games_tied] %> <br/>
+          </p>
+        </div>
       </div>
     </div>
   </div>

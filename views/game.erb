@@ -1,81 +1,102 @@
-<div class="row">
-  <div class="row">
-    <div class="col-md-12">
-      <div class="well">
-        <% if session[:dealer_cards].length == 2 && !@flip %>
-          <h4><strong>Dealer's Hand: </strong></h4>
-        <% else %>
-          <h4><strong>Dealer's Hand: </strong><%= calculate_total(session[:dealer_cards]).to_s %></h4>
-        <% end %>
-        <% cards= session[:dealer_cards] %>
-        <% cards.each do |card| %>
-          <% if session[:dealer_cards].length == 2 && cards.index(card) == 0 && !@flip%>
-            <%= card_cover %>
-          <% else %>
-            <%= image_of card %>
-          <% end %>
-        <% end %>
-        <% if @flip_card %>
-          <form action="/game/dealer/flip" method="post">
-            <input type="submit" value="Flip dealer's card" class="btn btn-info">
-          </form>
-        <% elsif @dealer_turn  %>
-          <h4>Dealer has to hit...</h4>
-          <form action="/game/dealer/hit" method="post">
-            <input type="submit" value="Continue Dealer's turn" class="btn btn-info">
-          </form>
-        <% end %>
-      </div>
-      <div class="well">
-        <div class="row">
-          <div class="col-md-9">
-            <h4><strong><%= session[:player_name]+'\'s' %> Hand:</strong><%= " "+calculate_total(session[:player_cards]).to_s %></h4>
-          </div>
-          <div class="col-md-3">
-            <h4 style="text-align: right; margin-right: 10px"><%= "Bet: $"+session[:bet].to_s %></h4>
-          </div>
-        </div>
-        <div class="row">
-          <div class="col-md-12">
-              <% session[:player_cards].each do |card| %>
-              <%= image_of card%>
-            <% end %>
-          </div>
-        </div>
+<div id="game">
+  <%if @loser %>
+    <div class="row">
+      <div class="col-md-12 alert-result">
+        <div class="alert alert-danger" role="alert" style="text-align: center"><strong><%=@loser%></strong></div>
       </div>
     </div>
-  </div>
-  <% if @show_option_pane %>
+  <% elsif @winner %>
+    <div class="row">
+      <div class="col-md-12 alert-result">
+        <div class="alert alert-success" role="alert" style="text-align: center"><strong><%=@winner%></strong></div>
+      </div>
+    </div>
+  <% end %> 
+  <div class="row">
     <div class="row">
       <div class="col-md-12">
-        <h4>What would you like to do?</h4>
-      </div>
-    </div>
-    <div class="row">
-      <div class="col-md-7">
-        <div class="btn-form-group">
-          <form action="/game/player/hit" method="POST">
-            <input type="submit" value="Hit" class='btn btn-success btn-lg'>
-          </form>
-          <form action="/game/player/stand" method="POST">
-            <input type="submit" value="Stand" class='btn btn-danger btn-lg'>
-          </form>
+        <div class="well">
+          <% if session[:dealer_cards].length == 2 && !@flip %>
+            <h4><strong>Dealer's Hand: </strong></h4>
+          <% else %>
+            <h4><strong>Dealer's Hand: </strong><%= calculate_total(session[:dealer_cards]).to_s %></h4>
+          <% end %>
+          <% cards = session[:dealer_cards] %>
+          <% cards.each do |card| %>
+            <% if session[:dealer_cards].length == 2 && cards.index(card) == 0 && !@flip%>
+              <%= card_cover %>
+            <% else %>
+              <%= image_of card %>
+            <% end %>
+          <% end %>
+          <% if @flip_card %>
+            <form id="flip_form" action="/game/dealer/flip" method="post">
+              <input type="submit" value="Flip dealer's card" class="btn btn-info">
+            </form>
+          <% elsif @dealer_turn %>
+            <h4>Dealer has to hit...</h4>
+            <form id="dealer_hit_form" action="/game/dealer/hit" method="post">
+              <input type="submit" value="Continue Dealer's turn" class="btn btn-info">
+            </form>
+          <% end %>
+        </div>
+        <div class="well">
+          <div class="row">
+            <div class="col-md-9">
+              <h4><strong><%= session[:player_name]+'\'s' %> Hand:</strong><%= " "+calculate_total(session[:player_cards]).to_s %></h4>
+            </div>
+            <div class="col-md-3">
+              <h4 style="text-align: right; margin-right: 10px"><%= "Bet: $"+session[:bet].to_s %></h4>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-12">
+                <% session[:player_cards].each do |card| %>
+                <%= image_of card%>
+              <% end %>
+            </div>
+          </div>
         </div>
       </div>
     </div>
-  <% else %>
-    <div class="row">
-      <div class="col-md-7">
-        <h4>Play again?</h4>
-        <div class="btn-form-group">
-          <form action='/game/play_again/yes' method="post">
-            <input type="submit" value="Yes" class="btn btn-success btn-lg">
-          </form>
-          <form action='/game/play_again/no' method='post'>
-            <input type="submit" value="No" class="btn btn-danger btn-lg">
-          </form>
+    <% if @show_option_pane %>
+      <div class="row">
+        <div class="col-md-12">
+          <h4>What would you like to do?</h4>
         </div>
       </div>
-    </div>
-  <% end %>
+      <div class="row">
+        <div class="col-md-7">
+          <div class="btn-form-group">
+            <form id="hit_form" action="/game/player/hit" method="POST">
+              <input type="submit" value="Hit" class='btn btn-success btn-lg'>
+            </form>
+            <form id="stand_form" action="/game/player/stand" method="POST">
+              <input type="submit" value="Stand" class='btn btn-danger btn-lg'>
+            </form>
+          </div>
+        </div>
+      </div>
+    <% elsif @flip_card || @dealer_turn %>
+      <div class="row">
+        <div class="col-md-7">
+          <h4>Dealer's turn...</h4>
+        </div>
+      </div>
+    <% else %>
+      <div class="row">
+        <div class="col-md-7">
+          <h4>Play again?</h4>
+          <div class="btn-form-group">
+            <form action='/game/play_again/yes' method="post">
+              <input type="submit" value="Yes" class="btn btn-success btn-lg">
+            </form>
+            <form action='/game/play_again/no' method='post'>
+              <input type="submit" value="No" class="btn btn-danger btn-lg">
+            </form>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div>
 </div>

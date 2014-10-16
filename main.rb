@@ -1,6 +1,6 @@
 require 'rubygems'
 require 'sinatra'
-# require 'sinatra/reloader' if development?
+require 'sinatra/reloader' if development?
 require 'pry'
 
 # set :sessions, true
@@ -44,11 +44,11 @@ helpers do
   end
 
   def image_of(card)
-    '<img src="/images/cards/'+card[0]+'_'+card[1].to_s+".jpg\" alt=\""+card[1].to_s+' of '+card[0]+'">'
+    '<img src="/images/cards/'+card[0]+'_'+card[1].to_s+".jpg\" width=\"116px\" height=\"163px\" alt=\""+card[1].to_s+' of '+card[0]+'">'
   end
 
   def card_cover
-    '<img src="/images/cards/cover.jpg" alt="card cover">'
+    '<img src="/images/cards/cover.jpg" width="116px" height="163px" alt="card cover">'
   end
 
   def calculate_total(cards)
@@ -82,11 +82,12 @@ helpers do
   def check_blackjack_or_bust
     total = calculate_total(session[:player_cards])
     if total > 21
-      @error = "Bust! You lose $"+session[:bet].to_s
+      @loser = "Bust! You lose $#{session[:bet]}"
       @show_option_pane = false
+      session[:total_lost] += session[:bet]
       session[:games_lost] += 1
     elsif total == 21
-      @success = "Blackjack! You win $"+session[:bet].to_s
+      @winner = "Blackjack! You win $#{session[:bet]}"
       @show_option_pane = false
       session[:total_winnings] += session[:bet]
       session[:player_balance] += (session[:bet])*2
@@ -98,28 +99,30 @@ helpers do
     total = calculate_total(session[:dealer_cards])
     p_total = calculate_total(session[:player_cards])
     if total > 21
-      @success = "Dealer Bust! You win $"+session[:bet].to_s
+      @winner = "Dealer Bust! You win $#{session[:bet]}"
       @show_option_pane = false
       session[:total_winnings] += session[:bet]
       session[:player_balance] += (session[:bet])*2
       session[:games_won] += 1
     elsif total == 21
-      @error = "Dealer Blackjack! You lose $"+session[:bet].to_s
+      @loser = "Dealer Blackjack! You lose $#{session[:bet]}"
       @show_option_pane = false
+      session[:total_lost] += session[:bet]
       session[:games_lost] += 1
     elsif p_total == total
-      @success = "It's a tie! You get your bet back!"
+      @winner = "It's a tie! You get your bet back!"
       @show_option_pane = false
       session[:games_tied] += 1
     elsif p_total > total
-      @success = "You have the higher hand! You win $"+session[:bet].to_s
+      @winner = "You have the higher hand! You win $#{session[:bet]}"
       @show_option_pane = false
       session[:total_winnings] += session[:bet]
       session[:player_balance] += (session[:bet])*2
       session[:games_won] += 1
     elsif total > p_total
-      @error = "Dealer has the higher hand! You lose $"+session[:bet].to_s
+      @loser = "Dealer has the higher hand! You lose $#{session[:bet]}"
       @show_option_pane = false
+      session[:total_lost] += session[:bet]
       session[:games_lost] += 1
     end
   end
@@ -128,6 +131,7 @@ end
 before do
   @show_option_pane = true
   @hide_player_info = false
+  @allow_balance = true
 end
 
 get '/' do
@@ -135,6 +139,8 @@ get '/' do
   session[:bet] = 0
   session[:player_balance] = 0
   session[:total_winnings] = 0
+  session[:total_buyins] = 0
+  session[:total_lost] = 0
   session[:games_won] = 0
   session[:games_lost] = 0
   session[:games_tied] = 0
@@ -161,17 +167,18 @@ get '/game/player/buyin' do
 end
 
 post '/game/player/buyin' do
-  if params[:buyin] == ""
+  if params[:buyin] == "" || params[:bet] == 0
     @error = "You need to enter a value in order to buy in!"
     erb :add_balance
   elsif params[:buyin].to_i < 0
     @error = "You can't enter a negative value!"
     erb :add_balance
-  elsif params[:buyin].to_i == 0 && params[:bet] == 0
+  elsif params[:buyin].to_i == 0 && params[:bet] != 0
     @error = "You entered an invalid value!"
     erb :add_balance
   else
     session[:player_balance] += params[:buyin].to_i
+    session[:total_buyins] += params[:buyin].to_i
     redirect '/game/player/profile'
   end
 end
@@ -198,13 +205,13 @@ post '/game/play' do
 end
 
 post '/game/player/bet' do
-  if params[:bet] == ""
+  if params[:bet] == "" || params[:bet] == 0
     @error = "You need to enter a bet in order to play!"
     erb :bet
   elsif params[:bet].to_i < 0
     @error = "You can't have a negative bet!"
     erb :bet
-  elsif params[:bet].to_i == 0 && params[:bet] == 0
+  elsif params[:bet].to_i == 0 && params[:bet] != 0
     @error = "You entered an invalid value!"
     erb :bet
   elsif (session[:player_balance]-params[:bet].to_i)<0
@@ -218,7 +225,6 @@ post '/game/player/bet' do
     erb :bet
   else
     session[:bet] = params[:bet].to_i
-    session[:player_balance] -= session[:bet]
     redirect '/game/initialize'
   end
 end
@@ -229,42 +235,46 @@ end
 
 get '/game/initialize' do
   initialize_game
+  session[:player_balance] -= session[:bet]
   session[:rounds] += 1
   redirect '/game'
 end
 
 get '/game' do
   check_blackjack_or_bust
+  @allow_balance = false
   erb :game
 end
 
 post '/game/player/hit' do
   player_deal
   check_blackjack_or_bust
-  erb :game
+  erb :game, layout: false
 end
 
 post '/game/player/stand' do
   @flip_card = true
-  erb :game
+  @show_option_pane = false
+  erb :game, layout: false
 end
 
 post '/game/dealer/flip' do
   @flip = true
   @flip_card = false
+  @show_option_pane = false
   @dealer_turn = true
   unless calculate_total(session[:dealer_cards]) < 17
     check_dealer_and_winner
     @dealer_turn = false
   end
-  erb :game
+  erb :game, layout: false
 end
 
 post '/game/dealer/hit' do
   dealer_hit
   check_dealer_and_winner
   @flip = true
-  erb :game
+  erb :game, layout: false
 end
 
 post '/game/play_again/yes' do
